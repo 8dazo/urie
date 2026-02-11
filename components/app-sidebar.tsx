@@ -4,14 +4,14 @@ import * as React from "react"
 import {
   BarChart3,
   Calendar,
-  GalleryVerticalEnd,
-  LayoutDashboard,
   Megaphone,
   Settings2,
   type LucideIcon,
   Users,
 } from "lucide-react"
 
+import { LayoutDashboard } from "@/components/animate-ui/icons/layout-dashboard"
+import { AnimateIcon } from "@/components/animate-ui/icons/icon"
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
@@ -26,16 +26,26 @@ import {
 import { navMainConfig } from "@/lib/navigation"
 
 const navMainIcons: Record<string, LucideIcon> = {
-  Dashboard: LayoutDashboard,
   Campaigns: Megaphone,
   Creators: Users,
   Content: Calendar,
   Settings: Settings2,
 }
 
+function DashboardIcon() {
+  return (
+    <AnimateIcon animateOnHover>
+      <LayoutDashboard size={16} />
+    </AnimateIcon>
+  )
+}
+
 const navMain = navMainConfig.map((item) => ({
   ...item,
-  icon: navMainIcons[item.title] ?? Settings2,
+  icon:
+    item.title === "Dashboard"
+      ? (DashboardIcon as unknown as LucideIcon)
+      : (navMainIcons[item.title] ?? Settings2),
   isActive: item.title === "Dashboard",
 }))
 
@@ -48,7 +58,6 @@ const data = {
   teams: [
     {
       name: "My Agency",
-      logo: GalleryVerticalEnd,
       plan: "Agency",
     },
   ],
@@ -75,7 +84,7 @@ export function AppSidebar({
     avatar: userProp?.avatar ?? defaultUser.avatar,
   }
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>

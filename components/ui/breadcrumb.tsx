@@ -1,7 +1,11 @@
+"use client"
+
 import * as React from "react"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import { Slot } from "radix-ui"
 
+import { ChevronRight } from "@/components/animate-ui/icons/chevron-right"
+import { AnimateIcon } from "@/components/animate-ui/icons/icon"
 import { cn } from "@/lib/utils"
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
@@ -75,7 +79,11 @@ function BreadcrumbSeparator({
       className={cn("[&>svg]:size-3.5", className)}
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? (
+        <AnimateIcon animateOnHover>
+          <ChevronRight size={14} />
+        </AnimateIcon>
+      )}
     </li>
   )
 }

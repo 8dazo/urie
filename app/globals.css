@@ -116,18 +116,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Sidebar always black/dark */
-[data-sidebar="sidebar"] {
-  --sidebar: oklch(0.09 0 0);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.55 0.2 265);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.18 0 0);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.55 0 0);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

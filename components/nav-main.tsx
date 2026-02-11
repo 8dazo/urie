@@ -1,7 +1,10 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react"
 
+import { ChevronRight } from "@/components/animate-ui/icons/chevron-right"
+import { AnimateIcon } from "@/components/animate-ui/icons/icon"
+import { useSidebarNavOpen } from "@/contexts/sidebar-nav-open"
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,6 +35,8 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const { openKeys, setOpenKey } = useSidebarNavOpen()
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -40,7 +45,8 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={item.isActive}
+            open={openKeys.has(item.title)}
+            onOpenChange={(open) => setOpenKey(item.title, open)}
             className="group/collapsible"
           >
             <SidebarMenuItem>
@@ -48,7 +54,9 @@ export function NavMain({
                 <SidebarMenuButton tooltip={item.title}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  <AnimateIcon animateOnHover>
+                  <ChevronRight size={16} className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                </AnimateIcon>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
