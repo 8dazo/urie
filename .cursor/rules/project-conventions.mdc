@@ -1,0 +1,16 @@
+---
+description: Core project context and conventions for Urie (agency + creator platform)
+alwaysApply: true
+---
+
+# Urie — Project context
+
+- **Product:** AI agency + creator platform. Agencies manage creators; creators have multiple social accounts (e.g. several Instagram/TikTok accounts). Workflow: Kanban (campaigns, content tasks, approval), scheduling, posting, AI insights.
+- **Plan:** Read [plan/ai-agency-creator-platform.md](plan/ai-agency-creator-platform.md) for goals, user types, workflow, MongoDB model, AI integration, and MVP scope.
+- **Guidelines:** Read [docs/GUIDELINES.md](docs/GUIDELINES.md) for stack, conventions, key locations, and priorities.
+
+## Conventions
+
+- Prefer additive, backward-compatible changes; use constants for DB/API field names.
+- New features should align with plan (workflow first, IG + TikTok first, MongoDB, migrations in `backend/migrations/` when present).
+- When changing schema or adding collections, follow plan §8 (schema evolution): migrations idempotent, optional `schemaVersion`, staging first.

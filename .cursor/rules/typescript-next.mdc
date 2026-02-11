@@ -1,0 +1,13 @@
+---
+description: TypeScript and Next.js conventions for Urie
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: false
+---
+
+# TypeScript & Next.js
+
+- Use strict TypeScript; prefer interfaces and shared types; avoid `any`.
+- Use path aliases from `tsconfig.json` for imports.
+- Next.js: prefer App Router (`app/`); functional components; colocate or use project CSS (e.g. `globals.css`, modules, or Tailwind as configured).
+- Naming: camelCase (variables, functions), PascalCase (components, types), kebab-case for multi-word file/folder names when appropriate.
+- Error handling: log and rethrow or return typed errors; avoid empty catch blocks.
