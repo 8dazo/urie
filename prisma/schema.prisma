@@ -1,0 +1,290 @@
+// Urie — AI Agency + Creator Platform
+// Prisma schema for MongoDB. Sync with: npx prisma db push
+// Seed: npx prisma db seed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+// ——— Enums ———
+enum UserRole {
+  agency_user
+  creator
+  admin
+}
+
+enum AgencyMemberRole {
+  owner
+  manager
+  analyst
+  editor
+}
+
+enum SocialPlatform {
+  instagram
+  tiktok
+  youtube
+  twitter
+}
+
+enum SocialAccountStatus {
+  active
+  revoked
+  expired
+}
+
+enum CampaignStatus {
+  draft
+  active
+  completed
+  archived
+}
+
+enum KanbanColumn {
+  backlog
+  in_progress
+  submitted_by_creator
+  needs_changes
+  approved
+  scheduled
+  published
+}
+
+enum ScheduledPostStatus {
+  pending
+  processing
+  posted
+  failed
+}
+
+enum AssetType {
+  video
+  image
+  thumbnail
+  document
+}
+
+// ——— Core: Agency & Users ———
+model Agency {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  slug         String   @unique
+  ownerUserId  String   @db.ObjectId
+  settings     Json?    // time_zone, default_platforms, branding, etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  owner        User              @relation("AgencyOwner", fields: [ownerUserId], references: [id])
+  members      AgencyMember[]
+  creators     Creator[]
+  socialAccounts SocialAccount[]
+  campaigns    Campaign[]
+  contentTasks ContentTask[]
+  assets       Asset[]
+  scheduledPosts ScheduledPost[]
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String?
+  role         UserRole
+  profile      Json?    // name, avatar, bio
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedAgencies   Agency[]        @relation("AgencyOwner")
+  agencyMemberships AgencyMember[]
+  assignedTasks   ContentTask[]   @relation("ContentTaskAssignee")
+  createdCaptions CaptionVersion[]
+  comments       Comment[]
+  creatorProfile Creator?
+}
+
+model AgencyMember {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId  String           @db.ObjectId
+  userId    String           @db.ObjectId
+  role      AgencyMemberRole
+  permissions Json?          // optional fine-grained permissions
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  agency Agency @relation(fields: [agencyId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([agencyId, userId])
+  @@index([agencyId])
+  @@index([userId])
+}
+
+// ——— Creators & Social Accounts ———
+model Creator {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId    String   @db.ObjectId
+  userId      String?  @unique @db.ObjectId
+  displayName String
+  notes       String?
+  tags        String[] // e.g. beauty, tech, UGC
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agency         Agency          @relation(fields: [agencyId], references: [id])
+  user           User?           @relation(fields: [userId], references: [id])
+  socialAccounts SocialAccount[]
+  contentTasks   ContentTask[]
+}
+
+model SocialAccount {
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  creatorId   String             @db.ObjectId
+  agencyId    String             @db.ObjectId
+  platform    SocialPlatform
+  handle      String
+  externalId  String?
+  // Tokens stored server-side (encrypt in app layer); not in schema for safety
+  status      SocialAccountStatus @default(active)
+  meta        Json?              // follower_count, profile_picture_url, etc.
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  creator        Creator         @relation(fields: [creatorId], references: [id])
+  agency         Agency         @relation(fields: [agencyId], references: [id])
+  scheduledPosts ScheduledPost[]
+}
+
+// ——— Campaigns & Content Tasks ———
+model Campaign {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId    String         @db.ObjectId
+  name        String
+  description String?
+  status      CampaignStatus @default(draft)
+  platforms   SocialPlatform[]
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  agency       Agency        @relation(fields: [agencyId], references: [id])
+  contentTasks ContentTask[]
+}
+
+model ContentTask {
+  id                    String       @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId               String       @db.ObjectId
+  campaignId             String?      @db.ObjectId
+  creatorId              String       @db.ObjectId
+  assignedToUserId       String?      @db.ObjectId
+  title                  String
+  description            String?
+  platform               SocialPlatform
+  targetSocialAccountIds String[]     // array of SocialAccount ids
+  kanbanColumn           KanbanColumn @default(backlog)
+  orderIndex             Int          @default(0)
+  dueAt                  DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  agency          Agency           @relation(fields: [agencyId], references: [id])
+  campaign        Campaign?       @relation(fields: [campaignId], references: [id])
+  creator         Creator         @relation(fields: [creatorId], references: [id])
+  assignedTo      User?           @relation("ContentTaskAssignee", fields: [assignedToUserId], references: [id])
+  assets          Asset[]
+  captionVersions CaptionVersion[]
+  comments        Comment[]
+  scheduledPosts  ScheduledPost[]
+
+  @@index([agencyId])
+  @@index([agencyId, campaignId, creatorId, kanbanColumn])
+  @@index([creatorId])
+}
+
+// ——— Assets & Captions & Comments ———
+model Asset {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId       String    @db.ObjectId
+  contentTaskId  String    @db.ObjectId
+  type           AssetType
+  storageProvider String?  // s3, gcs, etc.
+  url            String
+  metadata       Json?     // duration, size, format
+  createdAt      DateTime  @default(now())
+
+  agency      Agency      @relation(fields: [agencyId], references: [id])
+  contentTask ContentTask @relation(fields: [contentTaskId], references: [id])
+}
+
+model CaptionVersion {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  contentTaskId String   @db.ObjectId
+  createdByUserId String @db.ObjectId
+  text           String
+  language       String?  @default("en")
+  createdAt      DateTime @default(now())
+
+  contentTask ContentTask @relation(fields: [contentTaskId], references: [id])
+  createdBy   User         @relation(fields: [createdByUserId], references: [id])
+}
+
+model Comment {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  contentTaskId String   @db.ObjectId
+  authorUserId  String   @db.ObjectId
+  body          String
+  createdAt     DateTime @default(now())
+
+  contentTask ContentTask @relation(fields: [contentTaskId], references: [id])
+  author      User        @relation(fields: [authorUserId], references: [id])
+
+  @@index([contentTaskId])
+}
+
+// ——— Scheduling & Metrics ———
+model ScheduledPost {
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  contentTaskId  String             @db.ObjectId
+  agencyId       String             @db.ObjectId
+  socialAccountId String            @db.ObjectId
+  platform       SocialPlatform
+  scheduledFor   DateTime
+  status         ScheduledPostStatus @default(pending)
+  platformPostId String?
+  error          String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  contentTask  ContentTask  @relation(fields: [contentTaskId], references: [id])
+  agency       Agency       @relation(fields: [agencyId], references: [id])
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id])
+  metrics      PostMetrics[]
+
+  @@index([status])
+  @@index([scheduledFor])
+}
+
+model PostMetrics {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  scheduledPostId String   @db.ObjectId
+  snapshotTime    DateTime
+  impressions     Int?
+  views           Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  saves           Int?
+  clicks          Int?
+  ctr             Float?
+  engagementRate  Float?
+  createdAt       DateTime @default(now())
+
+  scheduledPost ScheduledPost @relation(fields: [scheduledPostId], references: [id])
+
+  @@index([scheduledPostId])
+  @@index([scheduledPostId, snapshotTime])
+}

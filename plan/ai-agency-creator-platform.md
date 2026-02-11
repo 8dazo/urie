@@ -56,26 +56,28 @@ Each card = **ContentTask** (e.g. “IG Reel about product launch”).
 
 ---
 
-## 3. MongoDB data model (simplified)
+## 3. Data model: Prisma + MongoDB
+
+**ORM:** Prisma on top of MongoDB. Single source of truth: `prisma/schema.prisma`. Sync schema with `npx prisma db push` (MongoDB has no SQL-style migrations).
 
 Tenant model: **Agency** owns most data.
 
-| Collection          | Key fields |
+| Model (Prisma)       | Key fields |
 |---------------------|------------|
-| `agencies`          | _id, name, slug, ownerUserId, settings |
-| `users`             | _id, email, password_hash, role (agency_user / creator / admin), profile |
-| `agency_members`    | _id, agencyId, userId, role (owner / manager / analyst / editor), permissions |
-| `creators`          | _id, agencyId, userId, displayName, notes, tags |
-| `social_accounts`   | _id, creatorId, agencyId, platform, handle, externalId, tokens (encrypted), status, meta |
-| `campaigns`         | _id, agencyId, name, description, status, platforms, startDate, endDate |
-| `content_tasks`     | _id, agencyId, campaignId, creatorId, assignedToUserId, title, description, platform, targetSocialAccountIds, kanbanColumn, orderIndex, dueAt, createdAt, updatedAt |
-| `assets`            | _id, agencyId, contentTaskId, type, storageProvider, url, metadata |
-| `caption_versions`  | _id, contentTaskId, createdByUserId, text, language, createdAt |
-| `comments`          | _id, contentTaskId, authorUserId, body, createdAt |
-| `scheduled_posts`   | _id, contentTaskId, agencyId, socialAccountId, platform, scheduledFor, status, platformPostId, error |
-| `post_metrics`     | _id, scheduledPostId, snapshotTime, impressions, views, likes, comments, shares, saves, clicks, ctr, engagementRate |
+| `Agency`            | id, name, slug, ownerUserId, settings (JSON) |
+| `User`               | id, email, passwordHash, role (enum), profile (JSON) |
+| `AgencyMember`      | id, agencyId, userId, role (enum), permissions (JSON?) |
+| `Creator`           | id, agencyId, userId?, displayName, notes, tags (array) |
+| `SocialAccount`     | id, creatorId, agencyId, platform, handle, externalId, status, meta (JSON); tokens stored encrypted server-side |
+| `Campaign`          | id, agencyId, name, description, status, platforms (array), startDate, endDate |
+| `ContentTask`       | id, agencyId, campaignId?, creatorId, assignedToUserId?, title, description, platform, kanbanColumn, orderIndex, dueAt, createdAt, updatedAt; targetSocialAccountIds (array of IDs) |
+| `Asset`             | id, agencyId, contentTaskId, type, storageProvider, url, metadata (JSON) |
+| `CaptionVersion`    | id, contentTaskId, createdByUserId, text, language, createdAt |
+| `Comment`           | id, contentTaskId, authorUserId, body, createdAt |
+| `ScheduledPost`     | id, contentTaskId, agencyId, socialAccountId, platform, scheduledFor, status, platformPostId?, error? |
+| `PostMetrics`       | id, scheduledPostId, snapshotTime, impressions, views, likes, etc.; ctr, engagementRate (optional) |
 
-**Indexes (examples):** `content_tasks`: agencyId, campaignId, creatorId, kanbanColumn; `scheduled_posts`: status, scheduledFor; `post_metrics`: scheduledPostId, snapshotTime.
+**Indexes:** Defined in `schema.prisma` with `@@index([agencyId])`, `@@index([agencyId, campaignId, creatorId, kanbanColumn])` on ContentTask, etc.
 
 ---
 
@@ -94,7 +96,7 @@ Tenant model: **Agency** owns most data.
 
 - **Frontend:** Next.js (or similar) — Kanban, calendar, dashboards.
 - **Backend:** Node/TypeScript API (REST or GraphQL); JWT auth; services: Campaign, ContentTask, Scheduling, Metrics, AI.
-- **DB:** MongoDB; indexes as above.
+- **DB:** MongoDB via Prisma; schema in `prisma/schema.prisma`; sync with `prisma db push`.
 - **Workers:** Job queue (e.g. BullMQ) for scheduled posts, metrics sync, AI jobs.
 - **Storage:** S3 (or equivalent) for media.
 - **Integrations:** IG + TikTok APIs first; notifications (email, Slack, in-app).
@@ -114,13 +116,13 @@ Then: full auto-post, more platforms, deeper AI.
 
 ---
 
-## 7. Future DB changes (schema evolution)
+## 7. Future DB changes (schema evolution with Prisma)
 
-- **Schema in code:** TypeScript interfaces + Mongoose (or Zod); optional `schemaVersion` on documents.
-- **Migrations:** `backend/migrations/` with dated/idempotent scripts; runner records completed migrations in DB.
-- **Add optional field:** Deploy code with default; optionally backfill.
-- **Rename field:** Dual read/write → backfill → switch to new name → remove old.
-- **New collection/index:** Deploy code; create index in background. Run migrations on staging first.
+- **Schema in code:** Prisma schema (`prisma/schema.prisma`) is the single source of truth; generate client with `npx prisma generate`.
+- **MongoDB + Prisma:** Use `npx prisma db push` to sync schema to DB (no migration history; for production, review changes and run push during maintenance or with backward-compatible app).
+- **Add optional field:** Add in schema, run `db push`; existing docs get the field as undefined/missing; app defaults in code.
+- **Rename field:** Add new field in schema; deploy code that reads both (old fallback); backfill data; switch to new field; remove old from schema and push.
+- **New model/index:** Add to schema, run `db push`. Run on staging first.
 
 ---
 

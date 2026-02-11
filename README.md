@@ -1,5 +1,15 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+**Urie** is an AI agency + creator platform (workflow, Kanban, scheduling, insights). Stack: Next.js, Prisma, MongoDB.
+
+### Database setup
+
+1. Set `MONGODB_URI` in `.env` and **include a database name** (e.g. `...mongodb.net/urie?retryWrites=true&w=majority`). See `.env.example`.
+2. Sync schema and seed mock data: `npx prisma db push` then `npx prisma db seed`.
+3. Run `npm run dev` and open [http://localhost:3000](http://localhost:3000). The dashboard shows agencies and users from the seed.
+
+Plan: `plan/ai-agency-creator-platform.md`. Guidelines: `docs/GUIDELINES.md`.
+
 ## Getting Started
 
 First, run the development server:
@@ -14,7 +24,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the resultz.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the results.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

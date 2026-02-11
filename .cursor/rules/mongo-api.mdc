@@ -1,13 +1,13 @@
 ---
-description: API and MongoDB conventions for Urie backend
-globs: "**/api/**/*.ts,**/backend/**/*.ts,**/models/**/*.ts,**/migrations/**/*.ts"
+description: API and Prisma/MongoDB conventions for Urie backend
+globs: "**/api/**/*.ts,**/lib/**/*.ts,**/prisma/**/*.ts"
 alwaysApply: false
 ---
 
-# API & MongoDB
+# API & Prisma + MongoDB
 
-- **Schema:** Define documents in code (TypeScript interfaces + Mongoose or Zod). Use constants for field names to ease renames.
+- **Schema:** Prisma schema in `prisma/schema.prisma` is the single source of truth. Use `prisma` from `@/lib/prisma`; use generated types. Use constants for field names in app code when referencing often-renamed fields.
 - **Tenant model:** Queries should be scoped by `agencyId` (or equivalent) unless explicitly system-wide.
-- **Migrations:** In `backend/migrations/` (or equivalent). Scripts must be idempotent; record completed migration IDs in DB; for large collections, migrate in batches (e.g. by `agencyId` or `_id`).
-- **Indexes:** Create in background where supported; document new indexes when adding queries.
+- **Schema changes:** Update `prisma/schema.prisma`, then `npx prisma db push` (MongoDB); run on staging first. Prefer additive changes.
+- **Indexes:** Add `@@index` in schema as needed; document new indexes when adding queries.
 - **Secrets:** Never commit tokens or API keys; use env vars and encrypt stored OAuth tokens.
