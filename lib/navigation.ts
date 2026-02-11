@@ -58,6 +58,7 @@ export const navMainConfig: NavMainItemConfig[] = [
     url: "/settings",
     items: [
       { title: "General", url: "/settings" },
+      { title: "Account", url: "/settings/account" },
       { title: "Team", url: "#" },
       { title: "Billing", url: "#" },
     ],
@@ -73,6 +74,10 @@ const routeBreadcrumbs: Record<string, RouteBreadcrumbConfig> = {
   "/settings": {
     label: "Settings",
     parent: { label: "Dashboard", href: "/" },
+  },
+  "/settings/account": {
+    label: "Account Settings",
+    parent: { label: "Settings", href: "/settings" },
   },
 }
 

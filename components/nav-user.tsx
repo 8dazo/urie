@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -55,8 +56,8 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+              <Avatar className="h-8 w-8 rounded-lg" key={user.avatar || user.email}>
+                <AvatarImage src={user.avatar || undefined} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
                   {user.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -78,8 +79,8 @@ export function NavUser({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                <Avatar className="h-8 w-8 rounded-lg" key={user.avatar || user.email}>
+                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
                   <AvatarFallback className="rounded-lg">
                     {user.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -112,9 +113,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck className="mr-2 size-4" />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/settings/account">
+                  <BadgeCheck className="mr-2 size-4" />
+                  Account
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard className="mr-2 size-4" />
@@ -139,3 +142,4 @@ export function NavUser({
     </SidebarMenu>
   )
 }
+

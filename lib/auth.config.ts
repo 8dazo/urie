@@ -14,13 +14,17 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role;
+        token.sessionToken = (user as { sessionToken?: string }).sessionToken;
       }
       return token;
     },
-    session({ session, token }) {
-      if (session.user) {
+    // No Prisma here so this file stays Edge-safe (used by middleware).
+    // Session validation and profile loading are in lib/auth.ts (Node only).
+    async session({ session, token }) {
+      if (session.user && token.id) {
         session.user.id = token.id as string;
         (session.user as { role?: string }).role = token.role as string;
+        (session.user as { sessionToken?: string }).sessionToken = token.sessionToken as string;
       }
       return session;
     },

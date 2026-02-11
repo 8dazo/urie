@@ -104,6 +104,21 @@ model User {
   createdCaptions CaptionVersion[]
   comments       Comment[]
   creatorProfile Creator?
+  sessions       UserSession[]
+}
+
+// User sessions for "active sessions" list and revoke (JWT carries sessionToken)
+model UserSession {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String    @db.ObjectId
+  sessionToken String   @unique
+  userAgent    String   @default("")
+  createdAt    DateTime @default(now())
+  revokedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AgencyMember {
