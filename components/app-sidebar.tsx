@@ -65,8 +65,8 @@ const data = {
   ],
   navMain,
   projects: [
-    { name: "Instagram", url: "#", icon: BarChart3 },
-    { name: "TikTok", url: "#", icon: BarChart3 },
+    { name: "Instagram", url: "/integrations/instagram", icon: BarChart3 },
+    { name: "TikTok", url: "/integrations/tiktok", icon: BarChart3 },
   ],
 }
 

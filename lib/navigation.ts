@@ -58,6 +58,7 @@ export const navMainConfig: NavMainItemConfig[] = [
     url: "/integrations",
     items: [
       { title: "Instagram", url: "/integrations/instagram" },
+      { title: "TikTok", url: "/integrations/tiktok" },
     ],
   },
   {
@@ -92,6 +93,10 @@ const routeBreadcrumbs: Record<string, RouteBreadcrumbConfig> = {
   },
   "/integrations/instagram": {
     label: "Instagram",
+    parent: { label: "Integrations", href: "/integrations" },
+  },
+  "/integrations/tiktok": {
+    label: "TikTok",
     parent: { label: "Integrations", href: "/integrations" },
   },
 }
