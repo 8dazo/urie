@@ -19,6 +19,7 @@ export async function GET() {
     where: {
       creatorId: creator.id,
       platform: "instagram",
+      status: "active",
     },
     select: {
       id: true,

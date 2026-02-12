@@ -2,27 +2,11 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { InstagramAccountCard } from "./instagram-account-card";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-
-function parseMeta(meta: unknown): {
-  followers_count?: number;
-  media_count?: number;
-  profile_picture_url?: string;
-  account_type?: string;
-} {
-  if (!meta || typeof meta !== "object") return {};
-  const m = meta as Record<string, unknown>;
-  return {
-    followers_count: typeof m.followers_count === "number" ? m.followers_count : undefined,
-    media_count: typeof m.media_count === "number" ? m.media_count : undefined,
-    profile_picture_url: typeof m.profile_picture_url === "string" ? m.profile_picture_url : undefined,
-    account_type: typeof m.account_type === "string" ? m.account_type : undefined,
-  };
-}
 
 export default async function IntegrationsInstagramPage({ searchParams }: Props) {
   const session = await auth();
@@ -97,52 +81,9 @@ export default async function IntegrationsInstagramPage({ searchParams }: Props)
           </div>
 
           <ul className="space-y-3">
-            {accounts.map((account) => {
-              const meta = parseMeta(account.meta);
-              return (
-                <li
-                  key={account.id}
-                  className="flex items-center gap-4 rounded-lg border bg-card p-4 text-card-foreground"
-                >
-                  <Avatar className="h-12 w-12">
-                    {meta.profile_picture_url && (
-                      <AvatarImage
-                        src={meta.profile_picture_url}
-                        alt={account.handle}
-                      />
-                    )}
-                    <AvatarFallback className="text-sm">
-                      {account.handle.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{account.handle}</p>
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      {meta.followers_count != null && (
-                        <span>{meta.followers_count} followers</span>
-                      )}
-                      {meta.media_count != null && (
-                        <span>{meta.media_count} media</span>
-                      )}
-                      {meta.account_type && (
-                        <span className="capitalize">
-                          {meta.account_type.replace(/_/g, " ")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-medium ${
-                      account.status === "active"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {account.status}
-                  </span>
-                </li>
-              );
-            })}
+            {accounts.map((account) => (
+              <InstagramAccountCard key={account.id} account={account} />
+            ))}
           </ul>
         </div>
       )}
@@ -155,6 +96,7 @@ async function loadAccounts(creatorId: string) {
     where: {
       creatorId,
       platform: "instagram",
+      status: "active",
     },
     select: {
       id: true,
