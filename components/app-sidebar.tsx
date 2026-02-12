@@ -5,6 +5,7 @@ import {
   BarChart3,
   Calendar,
   Megaphone,
+  Plug2,
   Settings2,
   type LucideIcon,
   Users,
@@ -29,6 +30,7 @@ const navMainIcons: Record<string, LucideIcon> = {
   Campaigns: Megaphone,
   Creators: Users,
   Content: Calendar,
+  Integrations: Plug2,
   Settings: Settings2,
 }
 

@@ -54,6 +54,13 @@ export const navMainConfig: NavMainItemConfig[] = [
     ],
   },
   {
+    title: "Integrations",
+    url: "/integrations",
+    items: [
+      { title: "Instagram", url: "/integrations/instagram" },
+    ],
+  },
+  {
     title: "Settings",
     url: "/settings",
     items: [
@@ -78,6 +85,14 @@ const routeBreadcrumbs: Record<string, RouteBreadcrumbConfig> = {
   "/settings/account": {
     label: "Account Settings",
     parent: { label: "Settings", href: "/settings" },
+  },
+  "/integrations": {
+    label: "Integrations",
+    parent: { label: "Dashboard", href: "/" },
+  },
+  "/integrations/instagram": {
+    label: "Instagram",
+    parent: { label: "Integrations", href: "/integrations" },
   },
 }
 
