@@ -148,9 +148,18 @@ export function AccountProfileTab() {
     let cancelled = false
     async function load() {
       try {
-        const res = await fetch("/api/account/profile")
+        const res = await fetch("/api/account/profile", {
+          credentials: "include",
+        })
         if (!res.ok) {
-          if (!cancelled) setError("Failed to load profile")
+          if (!cancelled) {
+            setError(res.status === 401 ? "Session expired. Please sign in again." : "Failed to load profile")
+            if (res.status === 401) {
+              // Clear invalid session so user can actually reach the login page
+              signOut({ redirectTo: "/login" })
+              return
+            }
+          }
           return
         }
         const json = await res.json()
@@ -177,6 +186,7 @@ export function AccountProfileTab() {
     try {
       const res = await fetch("/api/account/profile", {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name || undefined, email: email.trim() || undefined, avatar: avatar.trim() || undefined }),
       })
@@ -225,6 +235,9 @@ export function AccountProfileTab() {
     return (
       <div className="rounded-lg border bg-card p-6 text-card-foreground">
         <p className="text-destructive">{error ?? "Profile not found"}</p>
+        {error?.includes("Session expired") && (
+          <p className="text-muted-foreground mt-2 text-sm">Redirecting to sign in…</p>
+        )}
       </div>
     )
   }

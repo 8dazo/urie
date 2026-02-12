@@ -162,9 +162,9 @@ model SocialAccount {
   platform    SocialPlatform
   handle      String
   externalId  String?
-  // Tokens stored server-side (encrypt in app layer); not in schema for safety
+  accessToken String?            // OAuth token, encrypted at app layer
   status      SocialAccountStatus @default(active)
-  meta        Json?              // follower_count, profile_picture_url, etc.
+  meta        Json?              // follower_count, profile_picture_url, account_type, etc.
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 

@@ -23,7 +23,7 @@ export function AccountSessionsTab() {
   async function loadSessions() {
     setError(null)
     try {
-      const res = await fetch("/api/account/sessions")
+      const res = await fetch("/api/account/sessions", { credentials: "include" })
       if (!res.ok) {
         setError("Failed to load sessions")
         return
@@ -46,6 +46,7 @@ export function AccountSessionsTab() {
     try {
       const res = await fetch(`/api/account/sessions?id=${encodeURIComponent(sessionId)}`, {
         method: "DELETE",
+        credentials: "include",
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {

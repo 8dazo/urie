@@ -17,31 +17,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as { sessionToken?: string }).sessionToken = token.sessionToken as string;
       }
       // Session validation and fresh profile (Node only; not used in Edge middleware)
-      if (token.sessionToken && session.user?.id) {
+      if (session.user?.id) {
         try {
-          if (prisma.userSession?.findFirst) {
-            const valid = await prisma.userSession.findFirst({
-              where: {
-                sessionToken: token.sessionToken as string,
-                revokedAt: null,
-              },
+          // When sessionToken exists, validate against UserSession.
+          // Invalidate only if session was explicitly revoked. If session not found (e.g. after DB seed), allow.
+          if (token.sessionToken && prisma.userSession?.findFirst) {
+            const dbSession = await prisma.userSession.findFirst({
+              where: { sessionToken: token.sessionToken as string },
+              select: { revokedAt: true },
             });
-            if (!valid) {
+            if (dbSession?.revokedAt) {
               return { ...session, user: {} as typeof session.user };
             }
           }
+          // Load fresh profile from DB; invalidate if user was deleted (e.g. after seed)
           if (prisma.user?.findUnique) {
             const user = await prisma.user.findUnique({
               where: { id: session.user.id },
               select: { email: true, profile: true },
             });
-            if (user) {
-              session.user.email = user.email;
-              const profile = user.profile && typeof user.profile === "object" ? (user.profile as { name?: string; avatar?: string }) : undefined;
-              if (profile) {
-                session.user.name = profile.name ?? session.user.name ?? null;
-                session.user.image = profile.avatar ?? session.user.image ?? null;
-              }
+            if (!user) {
+              return { ...session, user: {} as typeof session.user };
+            }
+            session.user.email = user.email;
+            const profile = user.profile && typeof user.profile === "object" ? (user.profile as { name?: string; avatar?: string }) : undefined;
+            if (profile) {
+              session.user.name = profile.name ?? session.user.name ?? null;
+              session.user.image = profile.avatar ?? session.user.image ?? null;
             }
           }
         } catch (err) {
