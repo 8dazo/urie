@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { TikTokAccountCard } from "./tiktok-account-card";
+import { TikTokAccountCard } from "@/components/tiktok/tiktok-account-card";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { InstagramAccountCard } from "./instagram-account-card";
+import { InstagramAccountCard } from "@/components/instagram/instagram-account-card";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

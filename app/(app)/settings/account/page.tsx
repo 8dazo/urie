@@ -1,8 +1,8 @@
 import { PageBackHeader } from "@/components/page-back-header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AccountProfileTab } from "./account-profile-tab"
-import { AccountSecurityTab } from "./account-security-tab"
-import { AccountSessionsTab } from "./account-sessions-tab"
+import { AccountProfileTab } from "@/components/settings/account/account-profile-tab"
+import { AccountSecurityTab } from "@/components/settings/account/account-security-tab"
+import { AccountSessionsTab } from "@/components/settings/account/account-sessions-tab"
 
 export default function AccountSettingsPage() {
   return (
