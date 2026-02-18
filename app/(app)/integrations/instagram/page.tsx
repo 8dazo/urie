@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { InstagramAccountCard } from "@/components/instagram/instagram-account-card";
+import { InstagramAnalyticsDashboard } from "@/components/instagram/instagram-analytics-dashboard";
+import { InstagramMediaGrid } from "@/components/instagram/instagram-media-grid";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -85,6 +87,11 @@ export default async function IntegrationsInstagramPage({ searchParams }: Props)
               <InstagramAccountCard key={account.id} account={account} />
             ))}
           </ul>
+
+          <div className="space-y-6 mt-8">
+            <InstagramAnalyticsDashboard accountId={accounts[0].id} />
+            <InstagramMediaGrid accountId={accounts[0].id} />
+          </div>
         </div>
       )}
     </div>
