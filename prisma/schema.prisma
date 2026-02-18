@@ -171,6 +171,7 @@ model SocialAccount {
   creator        Creator         @relation(fields: [creatorId], references: [id])
   agency         Agency         @relation(fields: [agencyId], references: [id])
   scheduledPosts ScheduledPost[]
+  videos         SocialVideo[]
 }
 
 // ——— Campaigns & Content Tasks ———
@@ -302,4 +303,44 @@ model PostMetrics {
 
   @@index([scheduledPostId])
   @@index([scheduledPostId, snapshotTime])
+}
+
+model SocialVideo {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  socialAccountId String         @db.ObjectId
+  platform        SocialPlatform
+  externalId      String
+  title           String?
+  description     String?
+  thumbnailUrl    String?
+  videoUrl        String?
+  shareUrl        String?
+  duration        Int?
+  publishedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  socialAccount SocialAccount        @relation(fields: [socialAccountId], references: [id])
+  metrics      SocialVideoMetrics[]
+
+  @@unique([socialAccountId, externalId])
+  @@index([socialAccountId])
+}
+
+model SocialVideoMetrics {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  socialVideoId  String   @db.ObjectId
+  snapshotTime   DateTime
+  views          Int?
+  likes          Int?
+  comments       Int?
+  shares         Int?
+  saves          Int?
+  engagementRate Float?
+  createdAt      DateTime @default(now())
+
+  socialVideo SocialVideo @relation(fields: [socialVideoId], references: [id])
+
+  @@index([socialVideoId])
+  @@index([socialVideoId, snapshotTime])
 }
