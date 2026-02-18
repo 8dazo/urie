@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { TikTokAccountCard } from "@/components/tiktok/tiktok-account-card";
+import { TikTokAnalyticsDashboard } from "@/components/tiktok/tiktok-analytics-dashboard";
+import { TikTokVideoGrid } from "@/components/tiktok/tiktok-video-grid";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -82,6 +84,11 @@ export default async function IntegrationsTikTokPage({ searchParams }: Props) {
               <TikTokAccountCard key={account.id} account={account} />
             ))}
           </ul>
+
+          <div className="space-y-6 mt-8">
+            <TikTokAnalyticsDashboard accountId={accounts[0].id} />
+            <TikTokVideoGrid accountId={accounts[0].id} />
+          </div>
         </div>
       )}
     </div>
